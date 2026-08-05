@@ -1,0 +1,120 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  --color-ignis-void: #030407;
+  --color-ignis-bg: #09090b;
+  --color-ignis-panel: #101014;
+  --color-ignis-panel-2: #16161b;
+  --color-ignis-border: #26262e;
+  --color-ignis-cyan: #22d3ee;
+  --color-ignis-cyan-dim: #0891b2;
+  --color-ignis-orange: #fb923c;
+  --color-ignis-orange-dim: #c2410c;
+  --color-ignis-red: #f43f5e;
+  --color-ignis-green: #4ade80;
+  --color-ignis-violet: #a78bfa;
+
+  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
+  --animate-scan: scan 4s linear infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--color-ignis-void);
+  color: #e4e4e7;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3f3f46 transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.font-mono-tech {
+  font-family: var(--font-mono);
+}
+
+.glow-cyan {
+  text-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
+}
+.glow-orange {
+  text-shadow: 0 0 12px rgba(251, 146, 60, 0.6);
+}
+
+.panel-edge {
+  border: 1px solid var(--color-ignis-border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+}
+
+/* KaTeX dark-theme tweaks */
+.katex {
+  color: #e4e4e7;
+  font-size: 1em;
+}
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #27272a;
+  border-radius: 9999px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--color-ignis-cyan);
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+  cursor: pointer;
+  margin-top: -5px;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 9999px;
+  background: var(--color-ignis-cyan);
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+  cursor: pointer;
+}
