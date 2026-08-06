@@ -12,13 +12,13 @@ interface PanelProps {
 
 export function Panel({ title, icon, accent = 'cyan', className, children, action }: PanelProps) {
   return (
-    <div className={cn('panel-edge rounded-lg bg-ignis-panel/80 backdrop-blur-sm', className)}>
+    <div className={cn('panel-edge rounded-sm bg-ignis-panel', className)}>
       <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-ignis-border">
         <div className="flex items-center gap-2">
           {icon && (
             <span className={accent === 'cyan' ? 'text-ignis-cyan' : 'text-ignis-orange'}>{icon}</span>
           )}
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-300">{title}</h2>
+          <h2 className="text-[11px] font-medium uppercase tracking-[0.14em] text-zinc-400">{title}</h2>
         </div>
         {action}
       </div>

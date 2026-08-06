@@ -40,9 +40,9 @@ export function VolumetricPlasma() {
         uTempNorm: { value: 0.5 },
         uDensityNorm: { value: 0.5 },
         uIntensity: { value: 2.6 },
-        uColorLow: { value: new THREE.Color('#4c1d95') },
-        uColorMid: { value: new THREE.Color('#22d3ee') },
-        uColorHigh: { value: new THREE.Color('#f8fafc') },
+        uColorLow: { value: new THREE.Color('#3d3a5c') },
+        uColorMid: { value: new THREE.Color('#5b84a6') },
+        uColorHigh: { value: new THREE.Color('#eef1f3') },
       },
     });
   }, []);

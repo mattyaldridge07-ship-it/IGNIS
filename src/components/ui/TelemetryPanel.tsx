@@ -45,7 +45,7 @@ function StatTile({
   const colorClass =
     accent === 'cyan' ? 'text-ignis-cyan' : accent === 'orange' ? 'text-ignis-orange' : 'text-ignis-green';
   return (
-    <div className="panel-edge rounded-lg bg-ignis-panel/80 px-3 py-2.5 flex flex-col gap-1">
+    <div className="panel-edge rounded-sm bg-ignis-panel px-3 py-2.5 flex flex-col gap-1">
       <div className="flex items-center gap-1.5 text-zinc-500">
         {icon}
         <span className="text-[10px] uppercase tracking-wider">{label}</span>
@@ -59,12 +59,12 @@ function StatTile({
 }
 
 const tooltipStyle = {
-  background: '#101014',
-  border: '1px solid #26262e',
-  borderRadius: 6,
+  background: '#131416',
+  border: '1px solid #24262a',
+  borderRadius: 3,
   fontSize: 11,
   fontFamily: 'var(--font-mono)',
-  color: '#e4e4e7',
+  color: '#d4d4d8',
 };
 
 export function TelemetryPanel() {
@@ -89,10 +89,10 @@ export function TelemetryPanel() {
   }, [plasma.netJetPowerMW, nozzleParams, magnetics.bThroatT, magnetics.bExitT]);
 
   const powerBalance = [
-    { name: 'Fusion', value: plasma.fusionPowerMW, fill: '#fb923c' },
-    { name: 'Bremsstrahlung', value: -plasma.bremsstrahlungLossMW, fill: '#f43f5e' },
-    { name: 'Synchrotron', value: -plasma.synchrotronLossMW, fill: '#a78bfa' },
-    { name: 'Net Jet', value: plasma.netJetPowerMW, fill: '#22d3ee' },
+    { name: 'Fusion', value: plasma.fusionPowerMW, fill: '#b8925a' },
+    { name: 'Bremsstrahlung', value: -plasma.bremsstrahlungLossMW, fill: '#b3453f' },
+    { name: 'Synchrotron', value: -plasma.synchrotronLossMW, fill: '#6b6f9e' },
+    { name: 'Net Jet', value: plasma.netJetPowerMW, fill: '#6e93b3' },
   ];
 
   return (
@@ -177,13 +177,13 @@ export function TelemetryPanel() {
               />
               <YAxis stroke="#71717a" fontSize={10} tickLine={false} width={46} />
               <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: '#a1a1aa' }} />
-              <Line type="monotone" dataKey="isp" stroke="#22d3ee" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="isp" stroke="#6e93b3" strokeWidth={1.75} dot={false} />
               <ReferenceDot
                 x={nozzleParams.propMassFlowMgS}
                 y={nozzle.specificImpulseS}
-                r={4}
-                fill="#f8fafc"
-                stroke="#22d3ee"
+                r={3.5}
+                fill="#eef1f3"
+                stroke="#6e93b3"
               />
             </LineChart>
           </ResponsiveContainer>

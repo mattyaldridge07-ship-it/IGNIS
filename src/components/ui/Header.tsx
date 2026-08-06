@@ -20,11 +20,11 @@ export function Header() {
   ];
 
   return (
-    <header className="h-14 shrink-0 border-b border-ignis-border bg-ignis-bg/95 backdrop-blur-sm flex items-center justify-between px-4 z-20">
+    <header className="h-14 shrink-0 border-b border-ignis-border bg-ignis-bg flex items-center justify-between px-4 z-20">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <Atom className="w-5 h-5 text-ignis-cyan glow-cyan" strokeWidth={1.75} />
-          <span className="font-mono-tech font-bold tracking-[0.2em] text-sm text-zinc-100">IGNIS</span>
+          <Atom className="w-5 h-5 text-ignis-cyan" strokeWidth={1.5} />
+          <span className="font-mono-tech font-semibold tracking-[0.2em] text-sm text-zinc-200">IGNIS</span>
         </div>
         <span className="hidden md:inline text-[11px] text-zinc-500 font-mono-tech">
           Direct Fusion Drive Digital Twin
@@ -66,7 +66,7 @@ export function Header() {
 
         <div
           className={cn(
-            'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono-tech border',
+            'flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-mono-tech border',
             nominal
               ? 'border-ignis-green/40 text-ignis-green bg-ignis-green/10'
               : 'border-ignis-red/40 text-ignis-red bg-ignis-red/10 animate-pulse-slow',

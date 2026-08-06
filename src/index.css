@@ -5,18 +5,20 @@
   --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
 
-  --color-ignis-void: #030407;
-  --color-ignis-bg: #09090b;
-  --color-ignis-panel: #101014;
-  --color-ignis-panel-2: #16161b;
-  --color-ignis-border: #26262e;
-  --color-ignis-cyan: #22d3ee;
-  --color-ignis-cyan-dim: #0891b2;
-  --color-ignis-orange: #fb923c;
-  --color-ignis-orange-dim: #c2410c;
-  --color-ignis-red: #f43f5e;
-  --color-ignis-green: #4ade80;
-  --color-ignis-violet: #a78bfa;
+  /* Muted technical / blueprint palette: neutral grays, thin hairlines, one
+     restrained accent per role - no neon glow. */
+  --color-ignis-void: #08090a;
+  --color-ignis-bg: #0c0d0f;
+  --color-ignis-panel: #131416;
+  --color-ignis-panel-2: #18191c;
+  --color-ignis-border: #24262a;
+  --color-ignis-cyan: #6e93b3;
+  --color-ignis-cyan-dim: #4c6a84;
+  --color-ignis-orange: #b8925a;
+  --color-ignis-orange-dim: #8f7146;
+  --color-ignis-red: #b3453f;
+  --color-ignis-green: #7a9b7e;
+  --color-ignis-violet: #6b6f9e;
 
   --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
   --animate-scan: scan 4s linear infinite;
@@ -40,7 +42,7 @@ html, body, #root {
 
 body {
   background: var(--color-ignis-void);
-  color: #e4e4e7;
+  color: #d4d4d8;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -48,7 +50,7 @@ body {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3f3f46 transparent;
+  scrollbar-color: #333338 transparent;
 }
 
 ::-webkit-scrollbar {
@@ -56,7 +58,7 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: #333338;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-track {
@@ -67,21 +69,13 @@ body {
   font-family: var(--font-mono);
 }
 
-.glow-cyan {
-  text-shadow: 0 0 12px rgba(34, 211, 238, 0.6);
-}
-.glow-orange {
-  text-shadow: 0 0 12px rgba(251, 146, 60, 0.6);
-}
-
 .panel-edge {
   border: 1px solid var(--color-ignis-border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
 }
 
 /* KaTeX dark-theme tweaks */
 .katex {
-  color: #e4e4e7;
+  color: #d4d4d8;
   font-size: 1em;
 }
 .katex-display {
@@ -93,28 +87,27 @@ body {
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 4px;
-  background: #27272a;
+  height: 3px;
+  background: #24262a;
   border-radius: 9999px;
   outline: none;
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 9999px;
   background: var(--color-ignis-cyan);
-  box-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+  border: 1px solid #08090a;
   cursor: pointer;
-  margin-top: -5px;
+  margin-top: -4.5px;
 }
 input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #08090a;
   border-radius: 9999px;
   background: var(--color-ignis-cyan);
-  box-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
   cursor: pointer;
 }

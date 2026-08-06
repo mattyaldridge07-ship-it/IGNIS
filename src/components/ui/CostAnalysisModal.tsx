@@ -26,9 +26,9 @@ export function CostAnalysisModal() {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-40" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-3xl max-h-[85vh] overflow-y-auto bg-ignis-bg border border-ignis-border rounded-lg z-50 shadow-2xl">
-          <div className="flex items-center justify-between px-4 h-14 border-b border-ignis-border sticky top-0 bg-ignis-bg/95 backdrop-blur-sm">
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-3xl max-h-[85vh] overflow-y-auto bg-ignis-bg border border-ignis-border rounded-sm z-50">
+          <div className="flex items-center justify-between px-4 h-14 border-b border-ignis-border sticky top-0 bg-ignis-bg">
             <Dialog.Title className="flex items-center gap-2 text-sm font-mono-tech text-zinc-200">
               <DollarSign className="w-4 h-4 text-ignis-orange" />
               Techno-Economic Analysis
@@ -68,7 +68,7 @@ export function CostAnalysisModal() {
                   </button>
                 </div>
               </div>
-              <div className="overflow-x-auto rounded-lg border border-ignis-border">
+              <div className="overflow-x-auto rounded-sm border border-ignis-border">
                 <table className="w-full text-xs font-mono-tech">
                   <thead>
                     <tr className="bg-ignis-panel text-zinc-500 text-left">
@@ -108,8 +108,8 @@ function SummaryTile({ label, value, accent }: { label: string; value: string; a
   return (
     <div
       className={cn(
-        'panel-edge rounded-lg px-3 py-2.5',
-        accent ? 'bg-ignis-orange/10 border-ignis-orange/30' : 'bg-ignis-panel/80',
+        'panel-edge rounded-sm px-3 py-2.5',
+        accent ? 'bg-ignis-orange/10 border-ignis-orange/30' : 'bg-ignis-panel',
       )}
     >
       <div className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">{label}</div>

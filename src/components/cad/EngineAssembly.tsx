@@ -16,11 +16,11 @@ function CoilRing({ z, radius, current }: { z: number; radius: number; current: 
       <mesh rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[radius, 0.045, 12, 48]} />
         <meshStandardMaterial
-          color="#0e7490"
-          emissive="#22d3ee"
+          color="#33475a"
+          emissive="#6e93b3"
           emissiveIntensity={intensity}
-          metalness={0.7}
-          roughness={0.3}
+          metalness={0.6}
+          roughness={0.4}
         />
       </mesh>
     </group>
@@ -51,7 +51,7 @@ function InjectorCone({ angle, radius }: { angle: number; radius: number }) {
     <group ref={ref as React.RefObject<THREE.Group>} rotation={[0, -angle, Math.PI / 2]}>
       <mesh>
         <coneGeometry args={[0.035, 0.14, 12]} />
-        <meshStandardMaterial color="#fb923c" emissive="#c2410c" emissiveIntensity={0.6} metalness={0.4} roughness={0.4} />
+        <meshStandardMaterial color="#b8925a" emissive="#8f7146" emissiveIntensity={0.5} metalness={0.4} roughness={0.45} />
       </mesh>
     </group>
   );
@@ -67,7 +67,7 @@ export function EngineAssembly() {
 
   const shieldInnerRadius = Math.max(shieldOuterRadius - shieldThickness, 0.05);
   const frameRadius = shieldOuterRadius * 1.18;
-  const shieldColor = useCutawayMaterial('#8b8b96', '#fb923c', 1);
+  const shieldColor = useCutawayMaterial('#83838c', '#b8925a', 1);
 
   const strutAngles = Array.from({ length: 8 }, (_, i) => (i / 8) * Math.PI * 2);
   const injectorAngles = Array.from({ length: 8 }, (_, i) => (i / 8) * Math.PI * 2);
@@ -83,7 +83,7 @@ export function EngineAssembly() {
         <mesh>
           <cylinderGeometry args={[coreRadius * 1.15, coreRadius * 1.15, coreLength * 1.08, 48, 1, true]} />
           <meshPhysicalMaterial
-            color="#a5f3fc"
+            color="#8ca0ac"
             transparent
             opacity={0.12}
             depthWrite={false}
@@ -140,11 +140,11 @@ export function EngineAssembly() {
       >
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[coreRadius * 1.25, 0.025, 10, 48]} />
-          <meshStandardMaterial color="#f97316" emissive="#fb923c" emissiveIntensity={0.5} metalness={0.7} roughness={0.3} />
+          <meshStandardMaterial color="#a67f4e" emissive="#8f7146" emissiveIntensity={0.4} metalness={0.6} roughness={0.4} />
         </mesh>
         <mesh position={[0, 0.12, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[coreRadius * 1.25, 0.02, 10, 48]} />
-          <meshStandardMaterial color="#f97316" emissive="#fb923c" emissiveIntensity={0.5} metalness={0.7} roughness={0.3} />
+          <meshStandardMaterial color="#a67f4e" emissive="#8f7146" emissiveIntensity={0.4} metalness={0.6} roughness={0.4} />
         </mesh>
       </SubsystemLayer>
 
@@ -176,9 +176,9 @@ export function EngineAssembly() {
       </SubsystemLayer>
 
       <ambientLight intensity={0.55} />
-      <directionalLight position={[4, 6, 4]} intensity={1.8} color="#e0f2fe" />
-      <directionalLight position={[-5, -2, -3]} intensity={0.6} color="#fb923c" />
-      <pointLight position={[0, 0, 0]} intensity={0.4} color="#22d3ee" distance={4} />
+      <directionalLight position={[4, 6, 4]} intensity={1.8} color="#d8dee2" />
+      <directionalLight position={[-5, -2, -3]} intensity={0.5} color="#8f7146" />
+      <pointLight position={[0, 0, 0]} intensity={0.35} color="#6e93b3" distance={4} />
     </group>
   );
 }

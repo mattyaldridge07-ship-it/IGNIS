@@ -72,7 +72,7 @@ export function FieldLines() {
         uniforms: {
           uTime: { value: 0 },
           uPulseAmount: { value: 0.002 },
-          uColor: { value: new THREE.Color('#22d3ee') },
+          uColor: { value: new THREE.Color('#6e93b3') },
         },
       }),
     [],
@@ -114,7 +114,7 @@ export function FieldLines() {
       ))}
       <instancedMesh ref={instancedRef} args={[undefined, undefined, LINE_COUNT * PARTICLES_PER_LINE]}>
         <sphereGeometry args={[1, 8, 8]} />
-        <meshBasicMaterial color="#f0fdff" toneMapped={false} />
+        <meshBasicMaterial color="#dce4e8" toneMapped={false} />
       </instancedMesh>
     </SubsystemLayer>
   );

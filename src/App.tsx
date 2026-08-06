@@ -72,18 +72,18 @@ function Viewport() {
   return (
     <div className="relative flex-1 min-h-[320px] bg-ignis-void">
       <Canvas camera={{ position: PRESET_POS.iso, fov: 42, near: 0.05, far: 60 }}>
-        <color attach="background" args={['#030407']} />
-        <fog attach="fog" args={['#030407', 9, 24]} />
+        <color attach="background" args={['#08090a']} />
+        <fog attach="fog" args={['#08090a', 9, 24]} />
         <EngineAssembly />
         <Grid
           position={[0, -2.4, 0]}
           args={[20, 20]}
           cellSize={0.5}
           cellThickness={0.4}
-          cellColor="#1c1c22"
+          cellColor="#1c1c1f"
           sectionSize={2.5}
-          sectionThickness={0.8}
-          sectionColor="#0891b2"
+          sectionThickness={0.7}
+          sectionColor="#4c6a84"
           fadeDistance={16}
           fadeStrength={1.5}
           infiniteGrid

@@ -53,9 +53,7 @@ export function Slider({
           <RadixSlider.Range className={cn('absolute rounded-full h-full', accentColor)} />
         </RadixSlider.Track>
         <RadixSlider.Thumb
-          className={cn(
-            'block w-3.5 h-3.5 rounded-full bg-white shadow-[0_0_8px_rgba(34,211,238,0.8)] focus:outline-none focus:ring-2 focus:ring-ignis-cyan/60 cursor-pointer',
-          )}
+          className="block w-3 h-3 rounded-full bg-zinc-200 border border-ignis-void focus:outline-none focus:ring-2 focus:ring-ignis-cyan/50 cursor-pointer"
         />
       </RadixSlider.Root>
     </div>

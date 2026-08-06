@@ -129,7 +129,7 @@ export function ViewportControls() {
           Layers
         </button>
         {layersOpen && (
-          <div className="absolute bottom-full right-0 mb-2 z-20 flex w-64 flex-wrap gap-1.5 rounded-lg border border-ignis-border bg-ignis-panel/95 backdrop-blur-md p-2.5 shadow-xl">
+          <div className="absolute bottom-full right-0 mb-2 z-20 flex w-64 flex-wrap gap-1.5 rounded-sm border border-ignis-border bg-ignis-panel p-2.5">
             {LAYER_LABELS.map(({ key, label }) => (
               <button
                 key={key}

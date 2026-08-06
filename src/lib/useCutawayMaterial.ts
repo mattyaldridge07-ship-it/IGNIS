@@ -14,7 +14,7 @@ const cutawayVertex = /* glsl */ `
   }
 `;
 
-export function useCutawayMaterial(baseColorHex: string, edgeColorHex = '#fb923c', opacity = 1) {
+export function useCutawayMaterial(baseColorHex: string, edgeColorHex = '#b8925a', opacity = 1) {
   const cutawayAxis = useEngineStore((s) => s.cutawayAxis);
   const cutawayOffset = useEngineStore((s) => s.cutawayOffset);
 

@@ -32,9 +32,9 @@ export function MathDerivationView() {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-40" />
-        <Dialog.Content className="fixed right-0 top-0 h-full w-full max-w-md bg-ignis-bg border-l border-ignis-border z-50 overflow-y-auto shadow-2xl">
-          <div className="flex items-center justify-between px-4 h-14 border-b border-ignis-border sticky top-0 bg-ignis-bg/95 backdrop-blur-sm">
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
+        <Dialog.Content className="fixed right-0 top-0 h-full w-full max-w-md bg-ignis-bg border-l border-ignis-border z-50 overflow-y-auto">
+          <div className="flex items-center justify-between px-4 h-14 border-b border-ignis-border sticky top-0 bg-ignis-bg">
             <Dialog.Title className="flex items-center gap-2 text-sm font-mono-tech text-zinc-200">
               <Sigma className="w-4 h-4 text-ignis-cyan" />
               Live Derivations
