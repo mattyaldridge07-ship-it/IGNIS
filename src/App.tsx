@@ -1,9 +1,10 @@
 import type React from 'react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Grid } from '@react-three/drei';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { ChevronUp } from 'lucide-react';
 import { Header } from './components/ui/Header';
 import { SidebarControls } from './components/ui/SidebarControls';
 import { TelemetryPanel } from './components/ui/TelemetryPanel';
@@ -12,6 +13,7 @@ import { MathDerivationView } from './components/ui/MathDerivationView';
 import { CostAnalysisModal } from './components/ui/CostAnalysisModal';
 import { EngineAssembly } from './components/cad/EngineAssembly';
 import { useEngineStore, type CameraPreset } from './store/useEngineStore';
+import { cn } from './lib/cn';
 
 const PRESET_POS: Record<CameraPreset, [number, number, number]> = {
   iso: [4.5, 3, 4.5],
@@ -68,7 +70,7 @@ function Viewport() {
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
 
   return (
-    <div className="relative flex-1 min-h-[280px] bg-ignis-void">
+    <div className="relative flex-1 min-h-[320px] bg-ignis-void">
       <Canvas camera={{ position: PRESET_POS.iso, fov: 42, near: 0.05, far: 60 }}>
         <color attach="background" args={['#030407']} />
         <fog attach="fog" args={['#030407', 9, 24]} />
@@ -89,12 +91,13 @@ function Viewport() {
         <OrbitControls ref={controlsRef} enableDamping dampingFactor={0.08} minDistance={1.5} maxDistance={18} />
         <CameraRig controlsRef={controlsRef} />
       </Canvas>
-      <ViewportControls />
     </div>
   );
 }
 
 function App() {
+  const [telemetryOpen, setTelemetryOpen] = useState(true);
+
   return (
     <div className="h-screen w-screen flex flex-col bg-ignis-void overflow-hidden">
       <Header />
@@ -102,9 +105,19 @@ function App() {
         <SidebarControls />
         <main className="flex-1 min-w-0 flex flex-col">
           <Viewport />
-          <div className="shrink-0 max-h-[42%] overflow-y-auto border-t border-ignis-border p-3 bg-ignis-bg">
-            <TelemetryPanel />
-          </div>
+          <ViewportControls />
+          <button
+            onClick={() => setTelemetryOpen((v) => !v)}
+            className="shrink-0 flex items-center justify-center gap-1.5 py-1 text-[10px] font-mono-tech text-zinc-500 hover:text-zinc-300 border-t border-ignis-border bg-ignis-bg"
+          >
+            <ChevronUp className={cn('w-3 h-3 transition-transform', !telemetryOpen && 'rotate-180')} />
+            {telemetryOpen ? 'Hide Telemetry' : 'Show Telemetry'}
+          </button>
+          {telemetryOpen && (
+            <div className="shrink-0 max-h-[30%] overflow-y-auto p-3 bg-ignis-bg">
+              <TelemetryPanel />
+            </div>
+          )}
         </main>
       </div>
       <MathDerivationView />

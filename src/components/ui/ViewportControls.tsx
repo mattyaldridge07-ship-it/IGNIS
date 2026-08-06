@@ -1,4 +1,5 @@
-import { Boxes, Camera, Scissors } from 'lucide-react';
+import { Boxes, Camera, Scissors, Layers } from 'lucide-react';
+import { useState } from 'react';
 import { useEngineStore, type CameraPreset, type CutawayAxis, type SubsystemKey } from '../../store/useEngineStore';
 import { cn } from '../../lib/cn';
 
@@ -39,11 +40,12 @@ export function ViewportControls() {
   const setCameraPreset = useEngineStore((s) => s.setCameraPreset);
   const activeLayers = useEngineStore((s) => s.activeLayers);
   const toggleLayer = useEngineStore((s) => s.toggleLayer);
+  const [layersOpen, setLayersOpen] = useState(false);
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-3 flex flex-col gap-2 items-center">
-      <div className="pointer-events-auto flex flex-wrap items-center gap-3 bg-ignis-panel/90 backdrop-blur-md border border-ignis-border rounded-lg px-4 py-2.5 shadow-xl">
-        <div className="flex items-center gap-2">
+    <div className="flex items-center shrink-0 border-t border-ignis-border bg-ignis-bg pr-3">
+      <div className="flex flex-nowrap items-center gap-3 overflow-x-auto min-w-0 flex-1 px-3 py-1.5">
+        <div className="flex items-center gap-2 shrink-0">
           <Boxes className="w-3.5 h-3.5 text-ignis-cyan" />
           <span className="text-[10px] uppercase tracking-wider text-zinc-500">Explode</span>
           <input
@@ -53,18 +55,17 @@ export function ViewportControls() {
             step={0.01}
             value={explosionFactor}
             onChange={(e) => setExplosionFactor(Number(e.target.value))}
-            className="w-32"
+            className="w-24"
           />
           <span className="font-mono-tech text-xs text-ignis-cyan w-9 tabular-nums">
             {(explosionFactor * 100).toFixed(0)}%
           </span>
         </div>
 
-        <div className="w-px h-6 bg-ignis-border" />
+        <div className="w-px h-5 bg-ignis-border shrink-0" />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <Scissors className="w-3.5 h-3.5 text-ignis-orange" />
-          <span className="text-[10px] uppercase tracking-wider text-zinc-500">Cutaway</span>
           <div className="flex bg-ignis-void rounded p-0.5 border border-ignis-border">
             {CUTAWAY_OPTIONS.map((opt) => (
               <button
@@ -87,14 +88,14 @@ export function ViewportControls() {
               step={0.01}
               value={cutawayOffset}
               onChange={(e) => setCutawayOffset(Number(e.target.value))}
-              className="w-24"
+              className="w-20"
             />
           )}
         </div>
 
-        <div className="w-px h-6 bg-ignis-border" />
+        <div className="w-px h-5 bg-ignis-border shrink-0" />
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <Camera className="w-3.5 h-3.5 text-zinc-400" />
           <div className="flex bg-ignis-void rounded p-0.5 border border-ignis-border">
             {CAMERA_PRESETS.map((p) => (
@@ -111,23 +112,40 @@ export function ViewportControls() {
             ))}
           </div>
         </div>
+
       </div>
 
-      <div className="pointer-events-auto flex flex-wrap items-center gap-1.5 bg-ignis-panel/90 backdrop-blur-md border border-ignis-border rounded-lg px-3 py-1.5 shadow-xl">
-        {LAYER_LABELS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => toggleLayer(key)}
-            className={cn(
-              'px-2 py-0.5 text-[10px] font-mono-tech rounded border transition-colors',
-              activeLayers[key]
-                ? 'border-ignis-cyan/40 text-ignis-cyan bg-ignis-cyan/10'
-                : 'border-ignis-border text-zinc-600',
-            )}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="w-px h-5 bg-ignis-border shrink-0" />
+
+      <div className="relative shrink-0 ml-3">
+        <button
+          onClick={() => setLayersOpen((v) => !v)}
+          className={cn(
+            'flex items-center gap-1.5 px-2 py-1 text-[10px] font-mono-tech rounded border',
+            layersOpen ? 'border-ignis-cyan/40 text-ignis-cyan bg-ignis-cyan/10' : 'border-ignis-border text-zinc-400',
+          )}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          Layers
+        </button>
+        {layersOpen && (
+          <div className="absolute bottom-full right-0 mb-2 z-20 flex w-64 flex-wrap gap-1.5 rounded-lg border border-ignis-border bg-ignis-panel/95 backdrop-blur-md p-2.5 shadow-xl">
+            {LAYER_LABELS.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => toggleLayer(key)}
+                className={cn(
+                  'px-2 py-0.5 text-[10px] font-mono-tech rounded border transition-colors',
+                  activeLayers[key]
+                    ? 'border-ignis-cyan/40 text-ignis-cyan bg-ignis-cyan/10'
+                    : 'border-ignis-border text-zinc-600',
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
