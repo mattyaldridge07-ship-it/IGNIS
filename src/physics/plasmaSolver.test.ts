@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  bohmDiffusivity,
+  burnupFraction,
   electronDensityAndZeff,
+  energyConfinementTimeS,
   peakingFactorLinear,
   peakingFactorQuadratic,
   plasmaBeta,
@@ -98,5 +101,71 @@ describe('plasmaBeta', () => {
 
   it('falls as the magnetic field strengthens at fixed plasma pressure', () => {
     expect(plasmaBeta(1e20, 20, 6)).toBeLessThan(plasmaBeta(1e20, 20, 2));
+  });
+});
+
+describe('gyro-Bohm confinement scaling', () => {
+  it('diffusivity falls as the field strengthens (better magnetic confinement)', () => {
+    expect(bohmDiffusivity(20, 6)).toBeLessThan(bohmDiffusivity(20, 2));
+  });
+
+  it('confinement time grows with field and as the cube of core radius (gyro-Bohm: tau_E = a^3 / (D_Bohm rho_i))', () => {
+    expect(energyConfinementTimeS(0.35, 20, 6, 'D-T')).toBeGreaterThan(energyConfinementTimeS(0.35, 20, 2, 'D-T'));
+    expect(energyConfinementTimeS(0.7, 20, 4, 'D-T')).toBeCloseTo(8 * energyConfinementTimeS(0.35, 20, 4, 'D-T'), 6);
+  });
+});
+
+describe('burnupFraction', () => {
+  it('stays within [0, 1) and grows with confinement quality (n * sigmaV * tau)', () => {
+    const low = burnupFraction(1e20, 1e-22, 0.01);
+    const high = burnupFraction(1e20, 1e-22, 10);
+    expect(low).toBeGreaterThanOrEqual(0);
+    expect(high).toBeLessThan(1);
+    expect(high).toBeGreaterThan(low);
+  });
+
+  it('approaches 1 for very large n*sigmaV*tau', () => {
+    expect(burnupFraction(1e21, 1e-21, 1000)).toBeGreaterThan(0.99);
+  });
+});
+
+describe('solvePlasmaState transport/ignition additions', () => {
+  it('produces a positive, finite transport loss and confinement time', () => {
+    const state = solvePlasmaState(baseParams, 4);
+    expect(state.transportLossMW).toBeGreaterThan(0);
+    expect(state.energyConfinementTimeS).toBeGreaterThan(0);
+    expect(Number.isFinite(state.energyConfinementTimeS)).toBe(true);
+  });
+
+  it('keeps burn-up fraction within [0, 1)', () => {
+    const state = solvePlasmaState(baseParams, 4);
+    expect(state.burnupFraction).toBeGreaterThanOrEqual(0);
+    expect(state.burnupFraction).toBeLessThan(1);
+  });
+
+  it('reports a positive ignition margin factor', () => {
+    const state = solvePlasmaState(baseParams, 4);
+    expect(state.ignitionMarginFactor).toBeGreaterThan(0);
+  });
+
+  it('net jet power is the simple radiative-loss power balance, NOT double-counting transport loss', () => {
+    // transportLossW is a confinement-consistency diagnostic (feeds ignitionMarginFactor),
+    // not a second energy source - by conservation of energy, whatever heating isn't
+    // radiated away already exits as usable exhaust power.
+    const state = solvePlasmaState(baseParams, 4);
+    const expected =
+      baseParams.trapEfficiency * (state.fusionPowerChargedMW + baseParams.rfPowerMW) -
+      state.bremsstrahlungLossMW -
+      state.synchrotronLossMW;
+    expect(state.netJetPowerMW).toBeCloseTo(expected, 6);
+  });
+
+  it('ignition margin stays a well-defined, bounded ratio even when confinement is extremely poor', () => {
+    // A tiny core radius drives tau_E toward zero (gyro-Bohm ~ a^3), which would
+    // blow up an additive transport-power term but must stay a sane ratio here.
+    const state = solvePlasmaState({ ...baseParams, coreRadius: 0.02 }, 1);
+    expect(Number.isFinite(state.ignitionMarginFactor)).toBe(true);
+    expect(state.ignitionMarginFactor).toBeGreaterThanOrEqual(0);
+    expect(Number.isFinite(state.netJetPowerMW)).toBe(true);
   });
 });

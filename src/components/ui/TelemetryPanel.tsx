@@ -13,11 +13,21 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Gauge, Zap, Wind, Sigma, CircleGauge } from 'lucide-react';
+import { Gauge, Zap, Wind, Sigma, CircleGauge, Flame, Percent, ShieldAlert } from 'lucide-react';
 import { useEngineStore } from '../../store/useEngineStore';
 import { solveNozzleState } from '../../physics/nozzleSolver';
 import { Panel } from './Panel';
 import { cn } from '../../lib/cn';
+
+/** Adaptive formatting: fixed decimals for readable magnitudes, scientific notation
+ * outside that range so genuinely tiny/huge (but real) values don't collapse to "0.00". */
+function compact(value: number, digits = 2): string {
+  if (!Number.isFinite(value)) return '∞';
+  if (value !== 0 && (Math.abs(value) < 0.01 || Math.abs(value) >= 100000)) {
+    return value.toExponential(digits);
+  }
+  return value.toFixed(digits);
+}
 
 function StatTile({
   label,
@@ -60,17 +70,23 @@ const tooltipStyle = {
 export function TelemetryPanel() {
   const plasma = useEngineStore((s) => s.plasma);
   const nozzle = useEngineStore((s) => s.nozzle);
+  const magnetics = useEngineStore((s) => s.magnetics);
   const coreBeta = useEngineStore((s) => s.coreBeta);
   const nozzleParams = useEngineStore((s) => s.nozzleParams);
 
   const ispCurve = useMemo(() => {
     const points = [];
     for (let mdot = 5; mdot <= 200; mdot += 5) {
-      const state = solveNozzleState(plasma.netJetPowerMW, { ...nozzleParams, propMassFlowMgS: mdot });
+      const state = solveNozzleState(
+        plasma.netJetPowerMW,
+        { ...nozzleParams, propMassFlowMgS: mdot },
+        magnetics.bThroatT,
+        magnetics.bExitT,
+      );
       points.push({ mdot, isp: state.specificImpulseS });
     }
     return points;
-  }, [plasma.netJetPowerMW, nozzleParams]);
+  }, [plasma.netJetPowerMW, nozzleParams, magnetics.bThroatT, magnetics.bExitT]);
 
   const powerBalance = [
     { name: 'Fusion', value: plasma.fusionPowerMW, fill: '#fb923c' },
@@ -114,6 +130,36 @@ export function TelemetryPanel() {
           unit="β"
           icon={<CircleGauge className="w-3 h-3" />}
           accent={coreBeta > 1 ? 'orange' : 'cyan'}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5">
+        <StatTile
+          label="Ignition Margin"
+          value={compact(plasma.ignitionMarginFactor)}
+          unit="fα"
+          icon={<Flame className="w-3 h-3" />}
+          accent={plasma.ignitionMarginFactor >= 1 ? 'green' : 'orange'}
+        />
+        <StatTile
+          label="Fuel Burn-up"
+          value={compact(plasma.burnupFraction * 100)}
+          unit="%"
+          icon={<Percent className="w-3 h-3" />}
+        />
+        <StatTile
+          label="Nozzle Conversion"
+          value={compact(nozzle.conversionEfficiency * 100, 1)}
+          unit="%"
+          icon={<Wind className="w-3 h-3" />}
+          accent="green"
+        />
+        <StatTile
+          label="Coil Structural Margin"
+          value={compact(magnetics.minStructuralMargin)}
+          unit="×"
+          icon={<ShieldAlert className="w-3 h-3" />}
+          accent={magnetics.structuralWarning ? 'orange' : 'cyan'}
         />
       </div>
 

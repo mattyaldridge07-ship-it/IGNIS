@@ -24,7 +24,6 @@ export function MathDerivationView() {
   const plasma = useEngineStore((s) => s.plasma);
   const magnetics = useEngineStore((s) => s.magnetics);
   const nozzle = useEngineStore((s) => s.nozzle);
-  const nozzleParams = useEngineStore((s) => s.nozzleParams);
   const coreBeta = useEngineStore((s) => s.coreBeta);
 
   const species = FUEL_CYCLES[plasmaParams.fuel];
@@ -88,6 +87,32 @@ export function MathDerivationView() {
             </section>
 
             <section>
+              <h3 className="text-xs uppercase tracking-wider text-ignis-orange mb-2">Gyro-Bohm Confinement Time</h3>
+              <BlockMath math={`\\rho_i = \\frac{\\sqrt{2 m_i T_i}}{eB}\\qquad D_{gB} = \\frac{T_e[\\text{eV}]}{16B}\\cdot\\frac{\\rho_i}{a}\\qquad \\tau_E = \\frac{a^2}{D_{gB}}`} />
+              <BlockMath math={`\\tau_E = ${sci(plasma.energyConfinementTimeS)}\\,\\text{s}`} />
+              <p className="text-[11px] text-zinc-500">
+                &tau;<sub>E</sub> is a confinement-quality diagnostic: it sets the power that would be required to
+                replenish losses fast enough to actually sustain the assumed (n, T<sub>i</sub>) state - it feeds the
+                ignition margin below, not the jet-power balance directly (that would double-count energy already
+                conserved in P<sub>jet</sub>).
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xs uppercase tracking-wider text-ignis-orange mb-2">Burn-up &amp; Ignition Margin</h3>
+              <BlockMath math={`f_{burn} = \\frac{n_0 \\langle \\sigma v \\rangle \\tau_p}{1+n_0\\langle \\sigma v \\rangle \\tau_p}\\qquad f_\\alpha = \\frac{P_{fus,charged}}{P_{req} + P_{brem}+P_{sync}},\\ \\ P_{req}=\\frac{\\frac{3}{2}p_{plasma}V}{\\tau_E}`} />
+              <BlockMath
+                math={`f_{burn} = ${(plasma.burnupFraction * 100).toFixed(4)}\\%\\qquad f_\\alpha = ${sci(
+                  plasma.ignitionMarginFactor,
+                )}`}
+              />
+              <p className="text-[11px] text-zinc-500">
+                f<sub>&alpha;</sub> &ge; 1 means charged-particle fusion heating alone would sustain the plasma against
+                every loss channel (ignition), independent of auxiliary RF.
+              </p>
+            </section>
+
+            <section>
               <h3 className="text-xs uppercase tracking-wider text-ignis-cyan mb-2">Net Jet Power</h3>
               <BlockMath math={`P_{jet} = \\eta_{trap}(P_{fus,charged} + P_{RF}) - P_{brem} - P_{sync}`} />
               <BlockMath
@@ -99,16 +124,37 @@ export function MathDerivationView() {
                   2,
                 )} = ${fixed(plasma.netJetPowerMW, 2)}\\,\\text{MW}`}
               />
+              <p className="text-[11px] text-zinc-500">
+                In an open-field mirror, whatever heating isn&apos;t radiated away already exits the throats as usable
+                exhaust power - there is no separate transport term to add here.
+              </p>
             </section>
 
             <section>
-              <h3 className="text-xs uppercase tracking-wider text-ignis-cyan mb-2">Biot-Savart Axial Field</h3>
-              <BlockMath math={`B_z(z) = \\frac{\\mu_0}{2}\\sum_{i=1}^{N} \\frac{I_i R_i^2}{((z-z_i)^2+R_i^2)^{3/2}}`} />
+              <h3 className="text-xs uppercase tracking-wider text-ignis-cyan mb-2">Off-Axis Field (Elliptic Integrals)</h3>
+              <BlockMath
+                math={`B_z(r,z) = \\frac{\\mu_0 I}{2\\pi\\sqrt{(a+r)^2+\\Delta z^2}}\\left[E(k^2)\\frac{a^2-r^2-\\Delta z^2}{(a-r)^2+\\Delta z^2}+K(k^2)\\right],\\quad k^2=\\frac{4ar}{(a+r)^2+\\Delta z^2}`}
+              />
               <BlockMath
                 math={`B_{center} = ${fixed(Math.abs(magnetics.bCenterT), 3)}\\,\\text{T}\\quad B_{throat} = ${fixed(
                   magnetics.bThroatT,
                   3,
-                )}\\,\\text{T}`}
+                )}\\,\\text{T}\\quad B_{exit} = ${fixed(magnetics.bExitT, 3)}\\,\\text{T}`}
+              />
+              <p className="text-[11px] text-zinc-500">
+                K, E are complete elliptic integrals of the 1st/2nd kind (evaluated via the arithmetic-geometric mean),
+                giving the exact field off-axis - including at the conductor itself.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xs uppercase tracking-wider text-ignis-cyan mb-2">Coil Hoop Stress</h3>
+              <BlockMath math={`T = I \\, B_{ext} \\, R \\qquad \\sigma_{hoop} = \\frac{T}{A_{conductor}}`} />
+              <BlockMath
+                math={`\\sigma_{hoop,max} = ${fixed(
+                  Math.max(...magnetics.coilStress.map((c) => c.hoopStressMPa), 0),
+                  1,
+                )}\\,\\text{MPa}\\qquad \\text{margin} = ${fixed(magnetics.minStructuralMargin, 2)}\\times`}
               />
             </section>
 
@@ -130,19 +176,26 @@ export function MathDerivationView() {
             </section>
 
             <section>
-              <h3 className="text-xs uppercase tracking-wider text-ignis-green mb-2">Exhaust &amp; Thrust</h3>
-              <BlockMath math={`v_e = \\sqrt{\\frac{2\\eta_{nozzle} P_{jet}}{\\dot{m}}} \\qquad I_{sp} = \\frac{v_e}{g_0} \\qquad F = \\dot{m} v_e`} />
+              <h3 className="text-xs uppercase tracking-wider text-ignis-green mb-2">Adiabatic Magnetic Nozzle</h3>
               <BlockMath
-                math={`v_e = \\sqrt{\\frac{2 (${fixed(nozzleParams.nozzleEfficiency, 2)})(${fixed(
-                  plasma.netJetPowerMW * 1e6,
-                  0,
-                )}\\,\\text{W})}{${sci(nozzle.massFlowKgS)}\\,\\text{kg/s}}} = ${fixed(
-                  nozzle.exhaustVelocityMS,
-                  0,
-                )}\\,\\text{m/s}`}
+                math={`e_\\perp = \\tfrac{1}{2}e_{tot},\\ \\ e_\\parallel=\\tfrac{1}{2}e_{tot}\\qquad R_b=\\frac{B_{throat}}{B_{exit}}\\qquad e_{exit}=e_\\parallel+e_\\perp\\left(1-\\tfrac{1}{R_b}\\right)`}
               />
               <BlockMath
-                math={`I_{sp} = ${fixed(nozzle.exhaustVelocityMS, 0)} / 9.80665 = ${fixed(
+                math={`R_b = ${fixed(nozzle.expansionRatio, 1)}\\qquad \\eta_{conv} = ${(
+                  nozzle.conversionEfficiency * 100
+                ).toFixed(1)}\\%`}
+              />
+              <p className="text-[11px] text-zinc-500">
+                Perpendicular thermal energy converts to directed flow as the adiabatic invariant &mu; is conserved
+                while B falls through the diverging flux tube - the actual mechanism of magnetic-nozzle thrust.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-xs uppercase tracking-wider text-ignis-green mb-2">Exhaust &amp; Thrust</h3>
+              <BlockMath math={`v_e = \\sqrt{2\\eta_{nozzle}\\, e_{exit}} \\qquad I_{sp} = \\frac{v_e}{g_0} \\qquad F = \\dot{m} v_e`} />
+              <BlockMath
+                math={`v_e = ${fixed(nozzle.exhaustVelocityMS, 0)}\\,\\text{m/s}\\qquad I_{sp} = ${fixed(
                   nozzle.specificImpulseS,
                   0,
                 )}\\,\\text{s}\\qquad F = ${fixed(nozzle.thrustN, 2)}\\,\\text{N}`}

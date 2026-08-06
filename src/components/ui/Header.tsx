@@ -7,11 +7,12 @@ export function Header() {
   const plasmaParams = useEngineStore((s) => s.plasmaParams);
   const loadPreset = useEngineStore((s) => s.loadPreset);
   const quenchWarning = useEngineStore((s) => s.magnetics.quenchWarning);
+  const structuralWarning = useEngineStore((s) => s.magnetics.structuralWarning);
   const coreBeta = useEngineStore((s) => s.coreBeta);
   const setMathDrawerOpen = useEngineStore((s) => s.setMathDrawerOpen);
   const setCostModalOpen = useEngineStore((s) => s.setCostModalOpen);
 
-  const nominal = !quenchWarning && coreBeta < 1;
+  const nominal = !quenchWarning && !structuralWarning && coreBeta < 1;
 
   const presets: { id: FuelCycle; label: string }[] = [
     { id: 'D-3He', label: 'D-³He' },
@@ -72,7 +73,7 @@ export function Header() {
           )}
         >
           {nominal ? <CircleCheck className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
-          {nominal ? 'NOMINAL' : quenchWarning ? 'QUENCH RISK' : 'BETA LIMIT'}
+          {nominal ? 'NOMINAL' : quenchWarning ? 'QUENCH RISK' : structuralWarning ? 'STRUCTURAL LIMIT' : 'BETA LIMIT'}
         </div>
       </div>
     </header>

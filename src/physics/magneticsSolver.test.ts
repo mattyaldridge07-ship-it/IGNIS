@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   biotSavartAxial,
+  computeCoilStress,
+  ellipticKE,
   generateCoilGeometry,
+  offAxisField,
   rebcoCriticalCurrentDensity,
   solveMagneticsState,
 } from './magneticsSolver';
@@ -93,5 +96,67 @@ describe('solveMagneticsState', () => {
     const low = solveMagneticsState({ ...baseParams, coilCurrentA: 100 });
     const high = solveMagneticsState({ ...baseParams, coilCurrentA: 10000 });
     expect(high.quenchMargin).toBeLessThan(low.quenchMargin);
+  });
+
+  it('produces one hoop-stress entry per coil, all with positive stress and margin', () => {
+    const state = solveMagneticsState(baseParams);
+    expect(state.coilStress).toHaveLength(state.coils.length);
+    for (const c of state.coilStress) {
+      expect(c.hoopStressMPa).toBeGreaterThan(0);
+      expect(c.structuralMargin).toBeGreaterThan(0);
+    }
+  });
+
+  it('flags a structural warning once coil current is driven far past a sane design point', () => {
+    const overdriven = solveMagneticsState({ ...baseParams, coilCurrentA: 2_000_000 });
+    expect(overdriven.structuralWarning).toBe(true);
+  });
+});
+
+describe('ellipticKE', () => {
+  it('matches the exact closed form at m=0: K=E=pi/2', () => {
+    const { K, E } = ellipticKE(0);
+    expect(K).toBeCloseTo(Math.PI / 2, 10);
+    expect(E).toBeCloseTo(Math.PI / 2, 10);
+  });
+
+  it('K increases and E decreases as m grows toward 1 (standard elliptic-integral behaviour)', () => {
+    const low = ellipticKE(0.1);
+    const high = ellipticKE(0.9);
+    expect(high.K).toBeGreaterThan(low.K);
+    expect(high.E).toBeLessThan(low.E);
+  });
+});
+
+describe('offAxisField', () => {
+  it('reduces to biotSavartAxial on-axis', () => {
+    const coils = generateCoilGeometry(baseParams);
+    const onAxis = biotSavartAxial(coils, 0.2);
+    const { bz, br } = offAxisField(coils, 0, 0.2);
+    expect(bz).toBeCloseTo(onAxis, 8);
+    expect(br).toBe(0);
+  });
+
+  it('stays continuous moving off-axis by a small amount', () => {
+    const coils = generateCoilGeometry(baseParams);
+    const onAxis = biotSavartAxial(coils, 0.2);
+    const { bz } = offAxisField(coils, 0.001, 0.2);
+    expect(bz).toBeCloseTo(onAxis, 2);
+  });
+});
+
+describe('computeCoilStress', () => {
+  it('reports zero external field for a lone coil (no mutual field to react against)', () => {
+    const coils = generateCoilGeometry(baseParams);
+    const stress = computeCoilStress([coils[0]], baseParams);
+    expect(stress[0].externalFieldT).toBe(0);
+    expect(stress[0].hoopStressMPa).toBe(0);
+  });
+
+  it('hoop stress on coil 0 rises as more same-direction coils are added to the array', () => {
+    const coils = generateCoilGeometry(baseParams);
+    const stressFew = computeCoilStress(coils.slice(0, 2), baseParams);
+    const stressAll = computeCoilStress(coils, baseParams);
+    expect(stressAll[0].externalFieldT).toBeGreaterThan(stressFew[0].externalFieldT);
   });
 });

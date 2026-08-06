@@ -95,6 +95,63 @@ export function synchrotronLossDensity(
   return 6.2e-17 * ne * teKeV * bFieldT * bFieldT * (1 + teKeV / 204) * (1 - wallReflectivity);
 }
 
+const ELEMENTARY_CHARGE = 1.602176634e-19;
+const AMU_TO_KG = 1.66053906660e-27;
+
+/** Approximate average ion mass for the 50/50 fuel mix, amu. */
+const AVERAGE_ION_MASS_AMU: Record<FuelCycle, number> = {
+  'D-T': (2.014 + 3.016) / 2,
+  'D-3He': (2.014 + 3.016) / 2,
+};
+
+/**
+ * Bohm-scaling cross-field diffusivity, m^2/s. D_Bohm = Te[eV] / (16 B[T]).
+ * The standard pessimistic (worst-case) estimate for anomalous transport in
+ * a magnetised plasma.
+ */
+export function bohmDiffusivity(teKeV: number, bFieldT: number): number {
+  const teEv = Math.max(teKeV, 1e-6) * 1000;
+  return teEv / (16 * Math.max(bFieldT, 1e-6));
+}
+
+/** Thermal ion Larmor radius, m: rho_i = sqrt(2 m T) / (e B). */
+export function ionGyroradius(teKeV: number, bFieldT: number, fuel: FuelCycle): number {
+  const massKg = AVERAGE_ION_MASS_AMU[fuel] * AMU_TO_KG;
+  const tJ = Math.max(teKeV, 1e-6) * 1000 * ELEMENTARY_CHARGE;
+  return Math.sqrt(2 * massKg * tJ) / (ELEMENTARY_CHARGE * Math.max(bFieldT, 1e-6));
+}
+
+/**
+ * Gyro-Bohm diffusivity: D_gB = D_Bohm * (rho_i / a). Real optimised fusion
+ * devices are designed to approach gyro-Bohm (favourable, size-scaling)
+ * transport rather than the pessimistic Bohm limit, so this is the more
+ * appropriate default for a confinement-quality estimate.
+ */
+export function gyroBohmDiffusivity(teKeV: number, bFieldT: number, coreRadius: number, fuel: FuelCycle): number {
+  const rho = ionGyroradius(teKeV, bFieldT, fuel);
+  return bohmDiffusivity(teKeV, bFieldT) * (rho / Math.max(coreRadius, 1e-6));
+}
+
+/** tau_E = a^2 / D_gyroBohm: cross-field energy confinement time, s. */
+export function energyConfinementTimeS(
+  coreRadius: number,
+  teKeV: number,
+  bFieldT: number,
+  fuel: FuelCycle,
+): number {
+  return (coreRadius * coreRadius) / gyroBohmDiffusivity(teKeV, bFieldT, coreRadius, fuel);
+}
+
+/**
+ * Confinement-limited fuel burn-up fraction: f_b = n*<sv>*tau_p / (1 + n*<sv>*tau_p),
+ * assuming particle confinement time tau_p ~= tau_E (standard simplifying
+ * assumption in 0D fusion power-balance models).
+ */
+export function burnupFraction(n0: number, sigmaV: number, tauPS: number): number {
+  const x = n0 * sigmaV * tauPS;
+  return x / (1 + x);
+}
+
 export function solvePlasmaState(params: PlasmaParams, bFieldT: number): PlasmaState {
   const species = FUEL_CYCLES[params.fuel];
   const V = coreVolume(params.coreRadius, params.coreLength);
@@ -120,11 +177,29 @@ export function solvePlasmaState(params: PlasmaParams, bFieldT: number): PlasmaS
   const syncDensity = synchrotronLossDensity(neAvg, params.ionTempKeV, bFieldT, params.wallReflectivity);
   const syncPowerW = syncDensity * V * f1;
 
+  const tauE = energyConfinementTimeS(params.coreRadius, params.ionTempKeV, bFieldT, params.fuel);
+  const thermalEnergyJ = 1.5 * plasmaPressurePa(params.coreDensity, params.ionTempKeV) * V;
+  // The power that would be REQUIRED to replenish confinement losses fast enough
+  // to actually sustain the assumed (n, Ti) state against gyro-Bohm transport.
+  // This is a diagnostic, not an extra energy source: by conservation of energy,
+  // whatever heating isn't radiated away already exits as usable exhaust power
+  // below (open-field-line end-loss = the exhaust stream) - adding this term a
+  // second time would double-count it and blow up for any short tau_E.
+  const transportLossW = thermalEnergyJ / tauE;
+
   const rfPowerW = params.rfPowerMW * 1e6;
-  const netJetPowerW =
-    params.trapEfficiency * (fusionPowerChargedW + rfPowerW) - bremsPowerW - syncPowerW;
+  const netJetPowerW = params.trapEfficiency * (fusionPowerChargedW + rfPowerW) - bremsPowerW - syncPowerW;
 
   const qFactor = rfPowerW > 0 ? fusionPowerW / rfPowerW : Infinity;
+
+  // Ignition margin: charged-particle self-heating vs. every loss channel
+  // (including the confinement-required replenishment power). >=1 means the
+  // assumed (n, Ti) state is self-consistently sustainable without RF.
+  const confinementLossW = transportLossW + bremsPowerW + syncPowerW;
+  const ignitionMarginFactor = confinementLossW > 0 ? fusionPowerChargedW / confinementLossW : Infinity;
+
+  const fBurn = burnupFraction(params.coreDensity, sigmaV, tauE);
+  const lawsonTripleProduct = params.coreDensity * params.ionTempKeV * tauE;
 
   return {
     reactivityM3s: sigmaV,
@@ -133,6 +208,7 @@ export function solvePlasmaState(params: PlasmaParams, bFieldT: number): PlasmaS
     fusionPowerNeutronMW: fusionPowerNeutronW / 1e6,
     bremsstrahlungLossMW: bremsPowerW / 1e6,
     synchrotronLossMW: syncPowerW / 1e6,
+    transportLossMW: transportLossW / 1e6,
     netJetPowerMW: netJetPowerW / 1e6,
     electronDensity: neCentral,
     zEff,
@@ -140,6 +216,10 @@ export function solvePlasmaState(params: PlasmaParams, bFieldT: number): PlasmaS
     coreVolumeM3: V,
     peakingFactor1: f1,
     peakingFactor2: f2,
+    energyConfinementTimeS: tauE,
+    burnupFraction: fBurn,
+    ignitionMarginFactor,
+    lawsonTripleProduct,
   };
 }
 

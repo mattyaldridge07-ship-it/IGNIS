@@ -34,6 +34,7 @@ export interface PlasmaState {
   fusionPowerNeutronMW: number;
   bremsstrahlungLossMW: number;
   synchrotronLossMW: number;
+  transportLossMW: number;
   netJetPowerMW: number;
   electronDensity: number;
   zEff: number;
@@ -41,6 +42,14 @@ export interface PlasmaState {
   coreVolumeM3: number;
   peakingFactor1: number;
   peakingFactor2: number;
+  /** Bohm-scaling energy confinement time, s. */
+  energyConfinementTimeS: number;
+  /** Fraction of fuel ions consumed before being lost from confinement (n*<sv>*tau_p limited). */
+  burnupFraction: number;
+  /** P_fus,charged / (P_transport + P_brem + P_sync). >=1 means alpha/charged-particle heating alone sustains the plasma (ignition). */
+  ignitionMarginFactor: number;
+  /** n * T[keV] * tau_E triple product, m^-3 s keV. */
+  lawsonTripleProduct: number;
 }
 
 export interface MagneticsParams {
@@ -59,10 +68,23 @@ export interface CoilGeometry {
   currentA: number;
 }
 
+export interface CoilStress {
+  /** Peak field magnitude at this coil's own conductor, from the mutual field of every other coil (T). */
+  externalFieldT: number;
+  /** Hoop tension from that mutual field, N. */
+  hoopTensionN: number;
+  /** Hoop stress in the wound conductor bundle, MPa. */
+  hoopStressMPa: number;
+  /** yieldStrengthMPa / hoopStressMPa. <1 means the structure is predicted to fail. */
+  structuralMargin: number;
+}
+
 export interface MagneticsState {
   axialProfile: { z: number; bz: number }[];
   bCenterT: number;
   bThroatT: number;
+  /** Field at the far (nozzle-side) end of the sampled axial range - proxy for the magnetic nozzle exit field. */
+  bExitT: number;
   mirrorRatio: number;
   lossConeAngleDeg: number;
   criticalCurrentDensityAM2: number;
@@ -70,6 +92,9 @@ export interface MagneticsState {
   quenchWarning: boolean;
   quenchMargin: number;
   coils: CoilGeometry[];
+  coilStress: CoilStress[];
+  structuralWarning: boolean;
+  minStructuralMargin: number;
 }
 
 export interface NozzleParams {
@@ -83,6 +108,10 @@ export interface NozzleState {
   specificImpulseS: number;
   thrustN: number;
   thrustPowerMW: number;
+  /** B_throat / B_exit magnetic expansion ratio driving the adiabatic conversion. */
+  expansionRatio: number;
+  /** Fraction of the throat's total specific energy that ends up as directed exit kinetic energy. */
+  conversionEfficiency: number;
 }
 
 export interface CostParams {

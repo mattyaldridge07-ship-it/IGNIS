@@ -155,7 +155,7 @@ function computeAll(
 ) {
   const magnetics = solveMagneticsState(magneticsParams);
   const plasma = solvePlasmaState(plasmaParams, Math.abs(magnetics.bCenterT));
-  const nozzle = solveNozzleState(plasma.netJetPowerMW, nozzleParams);
+  const nozzle = solveNozzleState(plasma.netJetPowerMW, nozzleParams, magnetics.bThroatT, magnetics.bExitT);
   const cost = solveCostState(magneticsParams, plasmaParams.fuel, plasma.fusionPowerMW, costParams);
   const bom = generateBom(magneticsParams, costParams, cost);
   const coreBeta = plasmaBeta(plasmaParams.coreDensity, plasmaParams.ionTempKeV, Math.abs(magnetics.bCenterT));
